@@ -1,0 +1,563 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+White Wine Data Analysis by John Ngo
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(GGally)
+library(knitr)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+getwd()
+dataset <- read.csv('wineQualityWhites.csv')
+```
+
+> **Tip**: Before you create any plots, it is a good idea to provide a short
+introduction into the dataset that you are planning to explore. Replace this
+quoted text with that general information!
+
+In our dataset, we will be exploring the different variables in white wine to 
+draw insightful meaning on the relationship between the variables and quality.
+
+# Univariate Plots Section
+
+ **Tip**: In this section, you should perform some preliminary exploration of
+your dataset. Run some summaries of the data and create univariate plots to
+understand the structure of the individual variables in your dataset. Don't
+forget to add a comment after each plot or closely-related group of plots!
+There should be multiple code chunks and text sections; the first one below is
+just to help you get started.
+
+```{r echo=FALSE, message=FALSE}
+names(dataset)
+
+summary(dataset)
+
+str(dataset)
+```
+# Individual Plots
+
+```{r echo=FALSE, message=FALSE}
+?(dataset)
+```
+Our dataset contains 4898 observations and 13 variables.
+To show several similar histograms in one plot we need to use facets where we 
+show multiple histograms in one shot, using the melt method. 
+
+```{r echo=FALSE, message=FALSE}
+#dataset_molten <- melt(dataset)
+
+ggplot(melt(dataset), aes(x = value)) + geom_histogram() +
+  facet_wrap(~variable, scales = 'free')
+```
+
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x = fixed.acidity), data = dataset) +
+  geom_histogram(binwidth = .20) +
+  scale_x_continuous(breaks = seq(0, 15, .5))
+
+summary(dataset$fixed.acidity)
+```
+The median fixed acidity in the wine is 6.8 g/l, we can see that commonly white wine have an acidity level between 5.5 - 8.5 g/l.
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x = volatile.acidity), data = dataset) +
+  geom_histogram(binwidth = .01) +
+  scale_x_continuous(breaks = seq(0,2,.25))
+
+summary(dataset$volatile.acidity)
+```
+The distribution of volatile acidity is slightly right skewed with a median of 0.26 g/l. There are some outliers on the higher end of the scale. 
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x = citric.acid), data= dataset) +
+  geom_histogram(binwidth = .01) +
+  scale_x_continuous(breaks = seq(0,2,.25))
+
+summary(dataset$citric.acid)
+```
+The overall distribution of citric acid is normal with the median being 0.32g/l and the mean at 0.334g/l.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x = residual.sugar), data = dataset) +
+  geom_histogram(binwidth = .5) +
+  scale_x_continuous(breaks = seq(0,70,5))
+
+summary(dataset$residual.sugar)
+```
+Our residual sugar plot has a median value of 5.2g/l. The distribution is right skewed.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x= chlorides), data = dataset) +
+  geom_histogram(binwidth = 0.0025) +
+  scale_x_continuous(breaks = seq(0,.5,.020))
+
+summary(dataset$chlorides)
+```
+Our plot for chloride shows a median of 0.043 g/l with a normal distribution. 
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x = free.sulfur.dioxide), data= dataset) +
+  geom_histogram(binwidth = 2) +
+  scale_x_continuous(breaks = seq(0,1000,20))
+
+summary(dataset$free.sulfur.dioxide)
+```
+Our free sulfur dioxide plot is normally distributed and slightly right skewed. The median value is 34 g/l.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x = total.sulfur.dioxide), data = dataset) +
+  geom_histogram(binwidth = 5) +
+  scale_x_continuous(breaks = seq(0,500,20))
+
+summary(dataset$total.sulfur.dioxide)
+```
+Our total sulfur dioxide graph has a normal distribution and it's slightly right
+skewed. The median value is 134 g/l. 
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x= density), data= dataset) +
+  geom_histogram(binwidth = .0005) +
+  scale_x_continuous(breaks = seq(0,1,.01))
+
+summary(dataset$density)
+```
+The density of our white wines are in a very narrow range of .9917 - .9961. The median
+value is .9937.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x= pH), data= dataset) +
+  geom_histogram(binwidth = .01) +
+  scale_x_continuous(breaks = seq(0,5,.1))
+
+summary(dataset$pH)
+```
+Our pH plot shows an overall pH level ranging between 2.9-3.5 with a normal distribution.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x= sulphates), data= dataset) +
+  geom_histogram(binwidth = .01) +
+  scale_x_continuous(breaks = seq(0,5,.1))
+
+summary(dataset$sulphates)
+```
+Our sulphate plot is slightly right skewed with a median of .47g/l.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(aes(x= alcohol), data= dataset) +
+  geom_histogram(binwidth = .1) +
+  scale_x_continuous(breaks = seq(0,20,.5))
+
+summary(dataset$alcohol)
+```
+Our alcohol plot is right skewed. We notice it starts at 8%, perhaps a minimum level of 
+alcohol required for a wine. 
+
+
+# Univariate Analysis
+
+> **Tip**: Now that you've completed your univariate explorations, it's time to
+reflect on and summarize what you've found. Use the questions below to help you
+gather your observations and add your own if you have other thoughts!
+
+### What is the structure of your dataset?
+The dataset is a long format data with 4898 observation with 13 variables. 11 of the variables are measurements of a chemical property and one variable measuring the overall taste quality. Lastly, one variable listing the unique observation ID.  
+
+### What is/are the main feature(s) of interest in your dataset?
+The main feature of interest is the quality rating
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+I think by testing the different supporting variables will provide some insightful information
+that may help us with the investigation. We understand that some of the variables may
+have more of an impact on quality compared to the other ones.For example, we may notice some
+variables that may have a stronger correlation compared to others.
+
+### Did you create any new variables from existing variables in the dataset?
+No new variables were created in the dataset.
+
+### Of the features you investigated, were there any unusual distributions? \
+Did you perform any operations on the data to tidy, adjust, or change the form \
+of the data? If so, why did you do this?
+
+There were no unusual distributions, no missing value
+and no need to adjust for data. The current dataset is already cleaned which makes it a good dataset to analyze. 
+
+# Bivariate Plots Section
+
+> **Tip**: Based on what you saw in the univariate plots, what relationships
+between variables might be interesting to look at in this section? Don't limit
+yourself to relationships between a main output feature and one of the
+supporting variables. Try to look at relationships between supporting variables
+as well.
+
+```{r echo=FALSE, Bivariate_Plots}
+dataset$quality <- factor(dataset$quality, ordered = TRUE)
+
+# Setting up a function, comparing supporting variables to quality
+
+dottedbox <- function(variable) {
+  ggplot(data=dataset, aes_q(x = ~quality, y = as.name(variable))) +
+    geom_boxplot() +
+    geom_jitter(width = 0.5, alpha = 1/10) +
+    geom_line(aes(group = 1),
+              stat = 'summary',
+              fun.y = median,
+              color = '#e74c3c',
+              size = 1,
+              alpha = 0.8)
+}
+
+cond_median <- function(variable) {
+  print(paste('median of', variable, 'by quality:'))
+  print(by(dataset[[variable]], dataset$quality, median))
+}
+
+boxplot_median <- function(variable) {
+  cond_median(variable)
+  dottedbox(variable)
+}
+
+```
+
+```{r echo=FALSE, message=FALSE}
+boxplot_median("fixed.acidity")
+```
+
+We see a steady level of fixed acidity and it seems that fixed acidity is relatively stable
+across the different level of quality. Additionally, we see big dispersion of acidity values across the different quality levels. This may suggest that there may be other variables at play that contribute to the overall quality.
+
+```{r echo=FALSE, message=FALSE}
+boxplot_median("volatile.acidity")
+```
+
+The median level of volatile acidity is stable across the the different levels of quality, however, we do notice a slight dip as the quality rating increases. 
+
+```{r echo=FALSE, message=FALSE}
+boxplot_median("citric.acid")
+```
+
+With our observation, we notice that there is a slight increase in quality with an increase
+in citric acid.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+boxplot_median("residual.sugar") +
+  ylim(NA, quantile(dataset$residual.sugar, 0.90))
+```
+
+Residual sugar seems a bit sporadic relative to quality. It may have a low impact on the 
+quality of wine.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+boxplot_median("chlorides") +
+  ylim(NA, quantile(dataset$chlorides, 0.90))
+```
+
+Based on our observation, there is a very slight relation, as chloride decreases,
+the quality increases marginally.
+
+```{r echo=FALSE, message=FALSE,warning=FALSE}
+boxplot_median("free.sulfur.dioxide") 
+```
+
+Our free sulfur dioxide plot, takes a slight dip, then flattens out relative to the quality.
+
+```{r echo=FALSE, message=FALSE,warning=FALSE}
+boxplot_median("total.sulfur.dioxide") +
+  ylim(NA, 200)
+```
+
+With our total sulfur dioxide, we a see a temporary pop, then flattens out.
+```{r echo=FALSE, message=FALSE,warning=FALSE}
+boxplot_median("density") +
+  ylim(NA, quantile(dataset$density, 0.90))
+```
+
+We notice a pattern with density, as the density level decreases, the overall quality increases.
+
+```{r echo=FALSE, message=FALSE,warning=FALSE}
+boxplot_median("pH")
+```
+
+We notice a slight trend with the increase in pH, where quality tends to follow with a higher level of pH.
+
+```{r echo=FALSE, message=FALSE,warning=FALSE}
+boxplot_median("sulphates") +
+  ylim(NA, quantile(dataset$sulphates, 0.95))
+```
+
+Sulphates are fairly stable across the board relative to the quality.
+
+```{r echo=FALSE, message=FALSE}
+boxplot_median("alcohol")
+```
+
+Eventhough there is a slight dip at the quality rating 5, we notice that a higher level alcohol content is associated with a higher rating in wine quality.
+
+### Acidity and pH
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = pH, y = fixed.acidity))+
+  geom_point(alpha = 1/3)
+  
+```
+
+It looks like fixed.acidity has a negative relationship with pH, as fixed acidity declines, pH increases. We notice out of all the acidity group, fixed acidity carries a bigger weight relative to the other acids.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = pH, y = volatile.acidity))+
+  geom_point(alpha = 1/3)
+```
+
+Based on our observation, when we compare volatile acidity to pH, the relationship is concentrated around the
+0.1 to 0.45 and 2.9 to 3.5pH.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = pH, y = citric.acid))+
+  geom_point(alpha = 1/3)
+```
+
+With citric acid, similar to volatile acidity, the relationship is concentrated in a particular region of .1-.6 and 2.8 - 3.5pH.
+
+
+```{r echo=FALSE, message=FALSE}
+cor.test(~ pH + log10(fixed.acidity), data = dataset)
+```
+
+```{r echo=FALSE, message=FALSE}
+cor.test(~ pH + log10(volatile.acidity), data = dataset)
+```
+
+```{r echo=FALSE, message=FALSE}
+cor.test(~ pH + (citric.acid), data = dataset)
+```
+
+### Density, Alcohol, Chloride
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = chlorides, y = density))+
+  geom_point(alpha = 1/3)
+```
+
+We see that density and chlorides concentrated in one area.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = density, y = alcohol))+
+  geom_point(alpha = 1/3)
+```
+
+We notice that alcohol percentage decreases as density marginally increases.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = chlorides, y = alcohol))+
+  geom_point(alpha = 1/3)
+```
+
+Alcohol percentage decreases and chlorides marginally increases.
+
+### Sulphates, Sulfur Oxide, Chlorides
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = sulphates, y = free.sulfur.dioxide))+
+  geom_point(alpha = 1/3)
+```
+
+There is no discernible change as sulphate level changes, free sulfur dioxide remains relatively stable.
+
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = sulphates, y = total.sulfur.dioxide ))+
+  geom_point(alpha = 1/3)
+```
+
+There is no discernible change as sulphate level changes, total sulfur dioxide remains relatively stable.
+```{r echo=FALSE, message=FALSE}
+ggplot(dataset, aes(x = chlorides, y = sulphates))+
+  geom_point(alpha = 1/3)
+```
+
+There is no discernible change as sulphate level changes, chlorides remains relatively stable.
+```{r echo=FALSE, message=FALSE}
+cor(x = dataset[1:12],
+    y = as.numeric(dataset$quality),
+    method = "spearman")
+```
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+Overall, white wine quality has a stronger relationship with volatile acidity, chlorides, total sulfur dioxide,density and alcohol.
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+It was interesting to see a strong relationship between fixed acidity and pH. Perhaps it was due to a higher concentration relative to the other acids.
+
+### What was the strongest relationship you found?
+
+The strongest relationship we found with quality is the alcohol percentage.
+
+# Multivariate Plots Section
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, message=FALSE}
+
+# build function that will compare two variable along with quality
+
+scatter_with_quality_color <- function(x, y){
+  ggplot(dataset, aes_q(x = as.name(x), y = as.name(y), color = ~ quality))+
+    geom_point(alpha = 0.8, size = 2)+
+    scale_color_brewer(type = "div", palette = "RdYlGn")
+}
+
+scatter_with_quality_color("alcohol", "volatile.acidity")
+```
+
+We notice as volatile acidity decreases and as alcohol increases, the quality of wine increases.
+
+```{r echo=FALSE, message=FALSE}
+
+scatter_with_quality_color("fixed.acidity", "pH")
+  
+```
+
+Our plot here is a bit sporadic, we see high quality wine at different points on pH as well as different ranges of fixed acidity.
+
+```{r echo=FALSE, message=FALSE}
+scatter_with_quality_color("alcohol", "chlorides")
+```
+
+We notice as chlorides decreases and as alcohol increases, the quality of wine
+increases.
+
+```{r echo=FALSE, message=FALSE}
+scatter_with_quality_color(x = "total.sulfur.dioxide", y = "alcohol")
+```
+
+Total sulfur dioxide seem to have little to no effect on quality as we can see higher level quality is associated with higher level of alcohol percentage.
+
+```{r echo=FALSE, message=FALSE}
+cor.test(~ alcohol + sulphates, data = dataset)
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+The main part of our investigation were to investigate the features that had the highest correlation with quality.
+
+In our plot we see how alcohol and volatile acidity connect with quality ratings.
+Higher alcohol and lower volatile acidity tend to produce better quality wine.
+
+------
+
+# Final Plots and Summary
+
+> **Tip**: You've done a lot of exploration and have built up an understanding
+of the structure of and relationships between the variables in your dataset.
+Here, you will select three plots from all of your previous exploration to
+present here as a summary of some of your most interesting findings. Make sure
+that you have refined your selected plots for good titling, axis labels (with
+units), and good aesthetic choices (e.g. color, transparency). After each plot,
+make sure you justify why you chose each plot by describing what it shows.
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+dottedbox("volatile.acidity")+
+  xlab("Quality Rating")+
+  ylab("Volatile Acidity (acetic acid - g/l)")+
+  ggtitle("Higher acetic acid means lower quality")+
+  theme(text = element_text(size = 10))
+```
+
+### Description One
+
+With our plot, we can see the distribution of the volatile acidity across the different range of quality rating. The boxplot shows us the minimum, first quartile, median, third quartile, maximum value. The dots show us the distribution of wine in the categories. We can see the dots concentrated around the middle quality ratings and lower frequency on the lower and higher part of the quality ratings. The red line running across the boxplots helps with visualizing the trend between volatile acid and quality rating. We see that as volatile acid declines, the rating quality increases. 
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+dottedbox("alcohol")+
+  xlab("Quality Rating")+
+  ylab("Alcohol (% by Volume)")+
+  ggtitle("Higher alcohol percentage means higher quality")+
+  theme(text = element_text(size = 10))
+```
+
+### Description Two
+
+We can see alcohol contributing to the quality of wine. Eventhough the box plot may suggest that the impact declines from the rating quality of 3-5, we can see a strong incline from 5 and onwards on quality.
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+scatter_with_quality_color(x = "alcohol", y = "volatile.acidity")+
+  xlab("Alcohol (% by Volume)")+
+  ylab("Volatile Acidity (acetic acid - g/l)")+
+  ggtitle("Quality is affected by volatile acidity and alcohol")+
+  labs(color = "Quality Rating")+
+  theme(text = element_text(size = 10))
+```
+
+### Description Three
+
+When we compare volatile acid and alcohol, we see that these two variables which are both correlated to quality have an impact on the rating quality of wines. On the plot, we notice that the lower quality wine have high volatile acid and low alcohol level and as we move to the right of the graph, we will see lower levels of volatile acid and high alcohol level associated with higher wine quality. 
+
+
+# Reflection
+
+> **Tip**: Here's the final step! Reflect on the exploration you performed and
+the insights you found. 
+What were some of the struggles that you went through?
+What went well? 
+What was surprising? 
+Make sure you include an insight into
+future work that could be done with the dataset.
+
+This project was a great oppportunity to apply some of the R skills which we learnt earlier in the lessons. It was a great way to explore the different function and plotting feature that R offers.
+
+One of the challenges was selecting a meaningful variable that you wanted to dig deeper into and build around that. In addition, selecting supporting variables that are highly correlated to your main variable was also a challenge and insightful at the same time.
+
+Because R is such a powerful tool, it made exploring the data much more effective, it helps us see trends and allows us to draw meaningful insights.
+
+With this project, we were able to identify some of the trends in the data, perhaps we can build prediction models and see how this trend can be used to predict the wine quality based on the unique variables. 
+
+------
+
+# References
+
+https://classroom.udacity.com/nanodegrees/nd002/parts/0021345407/modules/316518875375460/lessons/755209509/concepts/8624987570923
+
+https://classroom.udacity.com/nanodegrees/nd002/parts/0021345407/modules/316518875375460/lessons/770038733/concepts/8822092900923
+
+
+
